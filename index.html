@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Currency">
+    <title>Currency Converter</title>
+    <style>
+        :root {
+            --bg:       #f2f2f7;
+            --card:     #ffffff;
+            --blue:     #007aff;
+            --red:      #ff3b30;
+            --green:    #34c759;
+            --text:     #000000;
+            --muted:    #8e8e93;
+            --border:   #c6c6c8;
+            --input-bg: #f2f2f7;
+            --radius:   14px;
+            --radius-sm: 10px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg:       #1c1c1e;
+                --card:     #2c2c2e;
+                --text:     #ffffff;
+                --muted:    #8e8e93;
+                --border:   #3a3a3c;
+                --input-bg: #1c1c1e;
+            }
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding-bottom: 40px;
+        }
+
+        header {
+            background: var(--card);
+            padding: 56px 20px 16px;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        header h1 {
+            font-size: 1.5em;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .rate-info {
+            font-size: 0.75em;
+            color: var(--muted);
+            margin-top: 3px;
+        }
+
+        .container { padding: 20px 16px; }
+
+        /* Converter card */
+        .card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        .currency-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .currency-select {
+            flex: 0 0 90px;
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 10px 12px;
+            font-size: 1.1em;
+            font-weight: 600;
+            color: var(--text);
+            font-family: inherit;
+            -webkit-appearance: none;
+            appearance: none;
+            text-align: center;
+        }
+
+        .amount-input {
+            flex-grow: 1;
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 10px 14px;
+            font-size: 1.4em;
+            font-weight: 500;
+            color: var(--text);
+            font-family: inherit;
+            -webkit-appearance: none;
+            outline: none;
+            width: 100%;
+        }
+
+        .amount-input:focus {
+            border-color: var(--blue);
+            box-shadow: 0 0 0 3px rgba(0,122,255,0.15);
+        }
+
+        .arrow {
+            text-align: center;
+            font-size: 1.4em;
+            color: var(--muted);
+            margin: 4px 0 14px;
+        }
+
+        .result-box {
+            background: var(--input-bg);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            text-align: center;
+        }
+
+        .result-amount {
+            font-size: 2.4em;
+            font-weight: 700;
+            color: var(--blue);
+            letter-spacing: -1px;
+        }
+
+        .result-label {
+            font-size: 0.85em;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+
+        .result-rate {
+            font-size: 0.8em;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+
+        /* Manage currencies */
+        .section-title {
+            font-size: 0.8em;
+            font-weight: 600;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            padding-left: 4px;
+        }
+
+        .currency-list {
+            background: var(--card);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        .currency-item {
+            display: flex;
+            align-items: center;
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+            gap: 12px;
+        }
+
+        .currency-item:last-child { border-bottom: none; }
+
+        .currency-code {
+            font-weight: 600;
+            font-size: 1em;
+            width: 48px;
+        }
+
+        .currency-name {
+            flex-grow: 1;
+            font-size: 0.9em;
+            color: var(--muted);
+        }
+
+        .remove-btn {
+            background: var(--red);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 26px;
+            height: 26px;
+            font-size: 1em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-weight: 600;
+        }
+
+        /* Add currency */
+        .add-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .add-select {
+            flex-grow: 1;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 10px 12px;
+            font-size: 0.95em;
+            color: var(--text);
+            font-family: inherit;
+            -webkit-appearance: none;
+        }
+
+        .add-btn {
+            background: var(--green);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 10px 18px;
+            font-size: 0.95em;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: opacity 0.15s;
+        }
+
+        .add-btn:active { opacity: 0.7; }
+
+        .error-msg {
+            color: var(--red);
+            font-size: 0.85em;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .loading { color: var(--muted); font-size: 0.9em; text-align: center; padding: 10px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>💱 Currency Converter</h1>
+    <div class="rate-info" id="rateInfo">Fetching live rates…</div>
+</header>
+
+<div class="container">
+
+    <!-- Converter -->
+    <div class="card">
+        <div class="currency-row">
+            <select class="currency-select" id="fromCurrency"></select>
+            <input class="amount-input" type="number" id="amount" placeholder="100" inputmode="decimal">
+        </div>
+        <div class="arrow">↓</div>
+        <div class="currency-row">
+            <select class="currency-select" id="toCurrency"></select>
+            <div class="result-box" style="flex-grow:1;">
+                <div class="result-amount" id="resultAmount">—</div>
+                <div class="result-label" id="resultLabel"></div>
+                <div class="result-rate" id="resultRate"></div>
+            </div>
+        </div>
+        <div class="error-msg" id="errorMsg"></div>
+    </div>
+
+    <!-- Manage currencies -->
+    <div class="section-title">My Currencies</div>
+    <div class="currency-list" id="currencyList"></div>
+
+    <div class="add-row">
+        <select class="add-select" id="addSelect"></select>
+        <button class="add-btn" onclick="addCurrency()">+ Add</button>
+    </div>
+
+</div>
+
+<script>
+    const CURRENCY_NAMES = {
+        AED:"UAE Dirham", AUD:"Australian Dollar", BRL:"Brazilian Real",
+        CAD:"Canadian Dollar", CHF:"Swiss Franc", CNY:"Chinese Yuan",
+        CZK:"Czech Koruna", DKK:"Danish Krone", EUR:"Euro",
+        GBP:"British Pound", HKD:"Hong Kong Dollar", HUF:"Hungarian Forint",
+        IDR:"Indonesian Rupiah", ILS:"Israeli Shekel", INR:"Indian Rupee",
+        JPY:"Japanese Yen", KRW:"South Korean Won", MXN:"Mexican Peso",
+        MYR:"Malaysian Ringgit", NOK:"Norwegian Krone", NZD:"New Zealand Dollar",
+        PHP:"Philippine Peso", PLN:"Polish Zloty", RON:"Romanian Leu",
+        SEK:"Swedish Krona", SGD:"Singapore Dollar", THB:"Thai Baht",
+        TRY:"Turkish Lira", USD:"US Dollar", ZAR:"South African Rand"
+    };
+
+    const DEFAULT_CURRENCIES = ['NZD', 'USD', 'EUR', 'GBP', 'AUD'];
+    let currencies = JSON.parse(localStorage.getItem('currencies') || JSON.stringify(DEFAULT_CURRENCIES));
+    let rates = {};
+    let ratesDate = '';
+
+    async function fetchRates() {
+        // Load cached rates immediately so UI works right away
+        const cached = localStorage.getItem('rates');
+        const cachedDate = localStorage.getItem('ratesDate');
+        if (cached) {
+            rates = JSON.parse(cached);
+            document.getElementById('rateInfo').textContent = `Rates as of ${cachedDate} (cached)`;
+        }
+
+        // Then try to fetch fresh rates
+        try {
+            const res = await fetch('https://api.frankfurter.app/latest?from=USD');
+            const data = await res.json();
+            rates = { USD: 1, ...data.rates };
+            ratesDate = data.date;
+            localStorage.setItem('rates', JSON.stringify(rates));
+            localStorage.setItem('ratesDate', ratesDate);
+            document.getElementById('rateInfo').textContent = `Rates as of ${ratesDate}`;
+        } catch(e) {
+            if (!cached) {
+                document.getElementById('rateInfo').textContent = 'No rates available — connect to internet once to cache rates';
+            }
+        }
+    }
+
+    function convert() {
+        const from = document.getElementById('fromCurrency').value;
+        const to = document.getElementById('toCurrency').value;
+        const amount = parseFloat(document.getElementById('amount').value);
+        const errEl = document.getElementById('errorMsg');
+
+        errEl.textContent = '';
+
+        if (!amount || isNaN(amount)) { errEl.textContent = 'Please enter an amount.'; return; }
+        if (!rates[from] || !rates[to]) { errEl.textContent = 'Rates not available yet.'; return; }
+
+        const rate = rates[to] / rates[from];
+        const result = amount * rate;
+
+        document.getElementById('resultAmount').textContent = formatAmount(result, to);
+        document.getElementById('resultLabel').textContent = `${amount} ${from} = ${formatAmount(result, to)} ${to}`;
+        document.getElementById('resultRate').textContent = `1 ${from} = ${rate.toFixed(4)} ${to}`;
+    }
+
+    function formatAmount(n, currency) {
+        const noDecimals = ['JPY', 'KRW', 'IDR', 'HUF'];
+        return noDecimals.includes(currency)
+            ? Math.round(n).toLocaleString()
+            : n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function renderSelects() {
+        const from = document.getElementById('fromCurrency');
+        const to = document.getElementById('toCurrency');
+        const prevFrom = from.value || currencies[0];
+        const prevTo = to.value || currencies[1];
+
+        [from, to].forEach(sel => {
+            sel.innerHTML = currencies.map(c =>
+                `<option value="${c}">${c}</option>`
+            ).join('');
+        });
+
+        from.value = currencies.includes(prevFrom) ? prevFrom : currencies[0];
+        to.value = currencies.includes(prevTo) ? prevTo : currencies[1];
+
+        renderCurrencyList();
+        renderAddSelect();
+    }
+
+    function renderCurrencyList() {
+        const list = document.getElementById('currencyList');
+        list.innerHTML = currencies.map(c => `
+            <div class="currency-item">
+                <span class="currency-code">${c}</span>
+                <span class="currency-name">${CURRENCY_NAMES[c] || ''}</span>
+                <button class="remove-btn" onclick="removeCurrency('${c}')" title="Remove">−</button>
+            </div>
+        `).join('');
+    }
+
+    function renderAddSelect() {
+        const sel = document.getElementById('addSelect');
+        const available = Object.keys(CURRENCY_NAMES).filter(c => !currencies.includes(c)).sort();
+        sel.innerHTML = available.map(c =>
+            `<option value="${c}">${c} — ${CURRENCY_NAMES[c]}</option>`
+        ).join('');
+    }
+
+    function addCurrency() {
+        const code = document.getElementById('addSelect').value;
+        if (code && !currencies.includes(code)) {
+            currencies.push(code);
+            save();
+            renderSelects();
+        }
+    }
+
+    function removeCurrency(code) {
+        if (currencies.length <= 2) { alert('Keep at least 2 currencies.'); return; }
+        currencies = currencies.filter(c => c !== code);
+        save();
+        renderSelects();
+    }
+
+    function save() {
+        localStorage.setItem('currencies', JSON.stringify(currencies));
+    }
+
+    // Convert as you type
+    document.getElementById('amount').addEventListener('input', convert);
+    document.getElementById('fromCurrency').addEventListener('change', convert);
+    document.getElementById('toCurrency').addEventListener('change', convert);
+
+    // Render UI immediately, fetch rates in background
+    renderSelects();
+    fetchRates();
+</script>
+
+</body>
+</html>
