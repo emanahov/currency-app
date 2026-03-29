@@ -335,6 +335,8 @@
         const from = document.getElementById('fromCurrency').value;
         const to = document.getElementById('toCurrency').value;
         const amount = parseFloat(document.getElementById('amount').value);
+        localStorage.setItem('lastFrom', from);
+        localStorage.setItem('lastTo', to);
         const errEl = document.getElementById('errorMsg');
 
         errEl.textContent = '';
@@ -360,8 +362,8 @@
     function renderSelects() {
         const from = document.getElementById('fromCurrency');
         const to = document.getElementById('toCurrency');
-        const prevFrom = from.value || currencies[0];
-        const prevTo = to.value || currencies[1];
+        const prevFrom = from.value || localStorage.getItem('lastFrom') || currencies[0];
+        const prevTo = to.value || localStorage.getItem('lastTo') || currencies[1];
 
         [from, to].forEach(sel => {
             sel.innerHTML = currencies.map(c =>
